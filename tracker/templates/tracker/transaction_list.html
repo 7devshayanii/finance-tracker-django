@@ -1,0 +1,104 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Transactions — Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="header-split">
+    <h2>All Transactions</h2>
+    <div class="actions">
+        {% if request.user.profile.role in 'Admin,Analyst' or request.user.is_superuser %}
+        <a href="{% url 'export_csv' %}" class="btn-link">Export CSV</a>
+        {% endif %}
+        {% if request.user.profile.role == 'Admin' or request.user.is_superuser %}
+        <a href="{% url 'transaction_create' %}" class="btn-dark">Add New</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if request.user.profile.role in 'Admin,Analyst' or request.user.is_superuser %}
+<div class="filter-box margin-tweak">
+    <form method="get" class="simple-form">
+        <div class="filter-fields">
+            <div class="field">
+                <label>From</label>
+                {{ filter_form.date_from }}
+            </div>
+            <div class="field">
+                <label>To</label>
+                {{ filter_form.date_to }}
+            </div>
+            <div class="field">
+                <label>Type</label>
+                {{ filter_form.type }}
+            </div>
+            <div class="field">
+                <label>Category</label>
+                {{ filter_form.category }}
+            </div>
+            <div class="field search-field">
+                <label>Search</label>
+                {{ filter_form.search }}
+            </div>
+        </div>
+        <div class="filter-actions align-shift">
+            <button type="submit" class="btn-dark">Filter</button>
+            <a href="{% url 'transaction_list' %}" class="btn-light">Reset</a>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<div class="list-meta">
+    <span class="count">Count: {{ page_obj.paginator.count }}</span>
+</div>
+
+{% if page_obj %}
+<table class="clean-table uneven-padding tx-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th class="desc-col">Note</th>
+            {% if request.user.profile.role == 'Admin' or request.user.is_superuser %}
+            <th class="right">Manage</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in page_obj %}
+        <tr>
+            <td>{{ t.date|date:"Y-m-d" }}</td>
+            <td class="type-{{ t.type }}">{{ t.get_type_display }}</td>
+            <td>{{ t.category|title }}</td>
+            <td>₹{{ t.amount|floatformat:2 }}</td>
+            <td class="desc-txt">{{ t.description|default:"-" }}</td>
+            {% if request.user.profile.role == 'Admin' or request.user.is_superuser %}
+            <td class="right manage-links">
+                <a href="{% url 'transaction_update' t.pk %}">Edit</a>
+                <a href="{% url 'transaction_delete' t.pk %}" class="delete">Delete</a>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if page_obj.has_other_pages %}
+<div class="simple-pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Prev</a>
+    {% endif %}
+
+    <span class="curr">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% else %}
+<div class="empty-list">No transactions.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Overview — Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header header-spacing">
+    <h2>Financial Overview</h2>
+    <p class="subtitle">Summary of your activity</p>
+</div>
+
+<div class="stats-row uneven-gap">
+    <div class="stat-box">
+        <span class="label">Total Income</span>
+        <strong class="value">₹{{ total_income|floatformat:2 }}</strong>
+    </div>
+    <div class="stat-box">
+        <span class="label">Total Expenses</span>
+        <strong class="value text-muted">₹{{ total_expenses|floatformat:2 }}</strong>
+    </div>
+    <div class="stat-box">
+        <span class="label">Balance</span>
+        <strong class="value">₹{{ balance|floatformat:2 }}</strong>
+    </div>
+    <div class="stat-box align-shift">
+        <span class="label">Records</span>
+        <strong class="value">{{ transaction_count }}</strong>
+    </div>
+</div>
+
+{% if request.user.profile.role in 'Admin,Analyst' or request.user.is_superuser %}
+<div class="reports-section">
+    <div class="report-col">
+        <h3>Expense Breakdown</h3>
+        {% if category_breakdown.expenses %}
+        <ul class="breakdown-list">
+            {% for item in category_breakdown.expenses %}
+            <li>
+                <span class="cat">{{ item.category }}</span>
+                <span class="amt">₹{{ item.total|floatformat:2 }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty">No expenses to show.</p>
+        {% endif %}
+    </div>
+
+    <div class="report-col">
+        <h3>Income Breakdown</h3>
+        {% if category_breakdown.income %}
+        <ul class="breakdown-list">
+            {% for item in category_breakdown.income %}
+            <li>
+                <span class="cat">{{ item.category }}</span>
+                <span class="amt">₹{{ item.total|floatformat:2 }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty">No income to show.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="monthly-report">
+    <h3>Monthly Summaries</h3>
+    {% if monthly_summary %}
+    <table class="clean-table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>In</th>
+                <th>Out</th>
+                <th>Net</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for month in monthly_summary %}
+            <tr>
+                <td>{{ month.month|date:"M Y" }}</td>
+                <td>₹{{ month.income|floatformat:2 }}</td>
+                <td class="text-muted">₹{{ month.expenses|floatformat:2 }}</td>
+                <td>₹{{ month.net|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty">No monthly data yet.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="recent-records">
+    <div class="section-head">
+        <h3>Recent Activity</h3>
+        <a href="{% url 'transaction_list' %}" class="view-link">View Everything</a>
+    </div>
+    
+    {% if recent_transactions %}
+    <table class="clean-table uneven-padding">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Desc</th>
+                <th class="right">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in recent_transactions %}
+            <tr>
+                <td>{{ t.date|date:"d M Y" }}</td>
+                <td>{{ t.get_type_display }}</td>
+                <td>{{ t.get_category_display }}</td>
+                <td class="desc">{{ t.description|default:"—"|truncatewords:6 }}</td>
+                <td class="right amount-{{ t.type }}">₹{{ t.amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty margin-tweak">Nothing recorded yet. {% if request.user.profile.role == 'Admin' or request.user.is_superuser %} <a href="{% url 'transaction_create' %}">Add something</a>{% endif %}</p>
+    {% endif %}
+</div>
+{% endblock %}

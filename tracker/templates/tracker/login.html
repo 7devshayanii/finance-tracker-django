@@ -1,0 +1,35 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Sign In — Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-box margin-tweak">
+        <h2 class="auth-title">Welcome</h2>
+        <p class="auth-sub">Sign in to your account</p>
+
+        <form method="post" class="auth-form align-shift">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="auth-error">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="input-row {% if form.username.errors %}error-row{% endif %}">
+                <label>Username</label>
+                <input type="text" name="username" class="auth-input">
+            </div>
+
+            <div class="input-row {% if form.password.errors %}error-row{% endif %}">
+                <label>Password</label>
+                <input type="password" name="password" class="auth-input">
+            </div>
+
+            <button type="submit" class="btn-dark btn-full btn-auth">Enter</button>
+        </form>
+
+        <p class="auth-footer">No account? <a href="{% url 'register' %}" class="btn-link">Register</a></p>
+    </div>
+</div>
+{% endblock %}

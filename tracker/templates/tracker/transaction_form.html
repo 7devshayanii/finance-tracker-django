@@ -1,0 +1,40 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}{{ title }} — Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-head header-spacing">
+        <h2>{{ title }}</h2>
+    </div>
+
+    <form method="post" class="standard-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="form-error-block">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="input-row {% if field.errors %}error-row{% endif %}">
+            <label>{{ field.label }}{% if field.field.required %}*{% endif %}</label>
+            {{ field }}
+            {% if field.errors %}
+            <span class="inline-error">{{ field.errors.0 }}</span>
+            {% endif %}
+            {% if field.help_text %}
+            <span class="hint">{{ field.help_text }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="form-buttons form-submit-row">
+            <!-- The specific slightly different button style requested by the user -->
+            <button type="submit" class="btn-odd">{{ submit_label }}</button>
+            <a href="{% url 'transaction_list' %}" class="btn-link">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

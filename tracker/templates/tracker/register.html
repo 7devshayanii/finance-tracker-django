@@ -1,0 +1,44 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Register — Finance Tracker{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-box margin-tweak">
+        <h2 class="auth-title">Create Account</h2>
+        <p class="auth-sub">Start tracking your finances today</p>
+
+        <form method="post" class="auth-form align-shift" id="register-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="auth-error">
+                {% for error in form.non_field_errors %}
+                <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="input-row {% if field.errors %}error-row{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                {% for error in field.errors %}
+                <span class="inline-error">{{ error }}</span>
+                {% endfor %}
+                {% endif %}
+                {% if field.help_text %}
+                <span class="hint">{{ field.help_text }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-dark btn-full btn-auth" id="btn-register">Create Account</button>
+        </form>
+
+        <p class="auth-footer">Already have an account? <a href="{% url 'login' %}" class="btn-link">Sign in</a></p>
+    </div>
+</div>
+{% endblock %}
+
